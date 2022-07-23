@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-size: 16pt;
+        }
+
+        #editor {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            background: #AAA;
+            padding: 5px;
+        }
+
+        #c {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <canvas id="c"></canvas>
+
+    <script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js"
+				}
+			}
+		</script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        import { OrbitControls } from '../examples/jsm/controls/OrbitControls.js';
+        import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
+        import { RGBELoader } from '../examples/jsm/loaders/RGBELoader.js';
+
+    let TKD_girl
+    let bones = []
+    let bone_name
+
+
+        function main() {
+            const canvas = document.querySelector('#c');
+            const renderer = new THREE.WebGLRenderer({ canvas });
+
+
+
+            const fov = 75;
+            const aspect = 2;  // the canvas default
+            const near = 0.1;
+            const far = 50;
+            const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera.position.z = 6;
+            camera.position.y = 2;
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+
+            const scene = new THREE.Scene();
+
+            scene.background = new THREE.Color(0xa0a0a0);
+            scene.fog = new THREE.Fog(0xa0a0a0, 10, 50);
+
+           
+
+            {
+                const color = 0xFFFFFF;
+                const intensity = 1;
+                const light = new THREE.DirectionalLight(color, intensity);
+                light.position.set(-1, 2, -4);
+
+                const light2 = new THREE.AmbientLight(color, intensity);
+                light.position.set(1, 0, 4);
+
+                const light3 = new THREE.DirectionalLight(color, intensity);
+                light.position.set(1, 0, 4);
+
+
+                scene.add(light, light2);
+            }
+
+            
+
+            // Instantiate a loader
+            const loader = new GLTFLoader();
+
+            // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+            // const dracoLoader = new DRACOLoader();
+            // dracoLoader.setDecoderPath('/examples/js/libs/draco/');
+            // loader.setDRACOLoader(dracoLoader);
+
+            // Load a glTF resource
+            loader.load(
+                // resource URL
+                'basic_human_figur_2.glb',
+                // called when the resource is loaded
+                function (gltf) {
+
+                    scene.add(gltf.scene);
+                    TKD_girl = gltf.scene
+                    gltf.animations; // Array<THREE.AnimationClip>
+                    gltf.scene; // THREE.Group
+                    gltf.scenes; // Array<THREE.Group>
+                    gltf.cameras; // Array<THREE.Camera>
+                    gltf.asset; // Object
+
+
+                    bones.push(TKD_girl.children)
+
+                   
+
+                    bone_name = bones[0][1].children[1]
+
+                    //WGT-rig_spine_fk
+
+                    //console.log(bones[0][1].children[1])
+                    console.log(bone_name)
+
+
+                    // for (let index = 0; index < 247; index++) {
+
+                    //     console.log(index + "\n")
+
+                    //     console.log(bones[0][index].name)
+                        
+
+                    // }
+
+
+
+
+
+                    let skeleton = new THREE.SkeletonHelper(TKD_girl);
+                    skeleton.visible = true;
+                    scene.add(skeleton);
+
+                    //bones.push(skeleton.bones[9])
+
+                },
+                // called while loading is progressing
+                function (xhr) {
+
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+                },
+                // called when loading has errors
+                function (error) {
+
+                    console.log('An error happened');
+
+                }
+            );
+
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(100, 100),
+                new THREE.MeshPhongMaterial({ color: 0x040404, depthWrite: false }));
+            mesh.rotation.x = - Math.PI / 2;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+
+
+
+
+            function resizeRendererToDisplaySize(renderer) {
+                const canvas = renderer.domElement;
+                const width = canvas.clientWidth * 4;
+                const height = canvas.clientHeight * 4;
+                const needResize = canvas.width !== width || canvas.height !== height;
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+                return needResize;
+            }
+
+            function render(time) {
+                time *= 0.001;
+
+                if (resizeRendererToDisplaySize(renderer)) {
+                    const canvas = renderer.domElement;
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+
+                  //bone_name.rotation.z = Math.PI / 2 
+                    bones.forEach((cube, ndx) => {
+                        const speed = 1 + ndx * .1;
+                        const rot = time * speed;
+                       
+                        
+                    //     // if (time >= 3
+                    //     //   && ndx == 4
+                    //     //   ) {
+
+                    //         //console.log(bones[0][22])
+
+                    //         //bones[0][22].position.z = time * 1000
+
+                    //         //bone_name.rotation.y += Math.sin(time);
+                             cube.rotation.z = Math.PI / 2
+
+                    //         // cube.position.x += 0.01
+                    //     //}
+
+                    });
+               
+                
+
+               
+
+                renderer.render(scene, camera);
+
+                requestAnimationFrame(render);
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        main();
+
+    </script>
+</body>
+
+</html>
