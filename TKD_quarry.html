@@ -35,11 +35,17 @@
 
 			import * as THREE from 'three';
 
-			import { OrbitControls } from '../examples/jsm/controls/OrbitControls.js';
-			import { RGBELoader } from '../examples/jsm/loaders/RGBELoader.js';
+			//"three": "https://unpkg.com/three@0.142.0/build/three.module.js"
+        import * as THREE from 'three';
+        //import * as THREE from 'https://unpkg.com/three@0.142.0/build/three.module.js';
 
-			import { GUI } from '../examples/jsm/libs/lil-gui.module.min.js';
-			import Stats from '../examples/jsm/libs/stats.module.js';
+        import { OrbitControls } from 'https://unpkg.com/three@0.142.0/examples/jsm/controls/OrbitControls.js';
+        //import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
+        import { GLTFLoader } from 'https://unpkg.com/three@0.142.0/examples/jsm/loaders/GLTFLoader.js';
+
+        //import { RGBELoader } from '../examples/jsm/loaders/RGBELoader.js';
+        import Stats from 'https://unpkg.com/three@0.142.0/examples/jsm/libs/stats.module.js';
+        import { GUI } from 'https://unpkg.com/three@0.142.0/examples/jsm/libs/lil-gui.module.min.js';
 
 			let camera, scene, renderer, stats;
 			let cube, sphere, torus, material;
