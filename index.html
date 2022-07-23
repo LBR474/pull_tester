@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>My first three.js app</title>
+    <title>Taekwondo training app</title>
     <style>
         html,
         body {
@@ -42,7 +42,7 @@
     <script type="importmap">
 			{
 				"imports": {
-					"three": "../build/three.module.js"
+					"three": "https://unpkg.com/three@0.142.0/build/three.module.js" 
                     
 				}
 			}
@@ -54,15 +54,15 @@
         import * as THREE from 'three';
         //import * as THREE from 'https://unpkg.com/three@0.142.0/build/three.module.js';
 
-        import { OrbitControls } from '../examples/jsm/controls/OrbitControls.js';
+        import { OrbitControls } from 'https://unpkg.com/three@0.142.0/examples/jsm/controls/OrbitControls.js';
         //import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
         import { GLTFLoader } from 'https://unpkg.com/three@0.142.0/examples/jsm/loaders/GLTFLoader.js';
 
         //import { RGBELoader } from '../examples/jsm/loaders/RGBELoader.js';
-        import Stats from '../examples/jsm/libs/stats.module.js';
-        import { GUI } from '../examples/jsm/libs/lil-gui.module.min.js';
+        import Stats from 'https://unpkg.com/three@0.142.0/examples/jsm/libs/stats.module.js';
+        import { GUI } from 'https://unpkg.com/three@0.142.0/examples/jsm/libs/lil-gui.module.min.js';
 
-        import * as SkeletonUtils from '../examples/jsm/utils/SkeletonUtils.js';
+        import * as SkeletonUtils from 'https://unpkg.com/three@0.142.0/examples/jsm/utils/SkeletonUtils.js';
 
 
 
