@@ -76,7 +76,7 @@
 			scene.rotation.y = 0.5; // avoid flying objects occluding the sun
 
 			new RGBELoader()
-				.setPath('../examples/textures/equirectangular/')
+				.setPath('./equirectangular/')
 				.load('quarry_01_1k.hdr', function (texture) {
 
 					texture.mapping = THREE.EquirectangularReflectionMapping;
