@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My first three.js app</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="PAW" class="pauseButton">Pause</button>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.142.0/build/three.module.js"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import * as THREE from "three";
+
+      import { OrbitControls } from "https://unpkg.com/three@0.142.0/examples/jsm/controls/OrbitControls.js";
+      import { GLTFLoader } from "https://unpkg.com/three@0.142.0/examples/jsm/loaders/GLTFLoader.js";
+
+      import Stats from "https://unpkg.com/three@0.142.0/examples/jsm/libs/stats.module.js";
+      import { GUI } from "https://unpkg.com/three@0.142.0/examples/jsm/libs/lil-gui.module.min.js";
+
+      import * as SkeletonUtils from "https://unpkg.com/three@0.142.0/examples/jsm/utils/SkeletonUtils.js";
+
+      let skeleton, bones, mixer, PawsOn;
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("gray");
+
+      const light = new THREE.HemisphereLight(0xbbbbff, 0x444422);
+      light.position.set(0, 1, 0);
+      scene.add(light);
+
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      document.getElementById("PAW").addEventListener("click", togglePause, false);
+      function togglePause() {
+	            PawsOn = true;	// toggles between 0 and 1
+            }
+
+    //   const geometry = new THREE.BoxGeometry(1, 1, 1);
+    //   const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    //   const cube = new THREE.Mesh(geometry, material);
+    //   cube.position.x = -2;
+    //   scene.add(cube);
+
+      const axesHelper = new THREE.AxesHelper(5);
+      scene.add(axesHelper);
+
+      const loader = new GLTFLoader();
+
+      loader.load("TKD_girl_8.glb", function (gltf) {
+        const model = gltf.scene;
+
+        scene.add(model);
+
+        model.position.x = 0;
+        model.position.y = 0;
+        model.position.z = 0;
+
+        skeleton = new THREE.SkeletonHelper(model);
+        skeleton.visible = true;
+        scene.add(skeleton);
+
+        let spine = skeleton.bones[0];
+      let spine001 = skeleton.bones[1];
+      let spine002 = skeleton.bones[2];
+      let spine003 = skeleton.bones[3];
+      let spine004 = skeleton.bones[4];
+      let spine005 = skeleton.bones[5];
+      let spine006 = skeleton.bones[6];
+      let face = skeleton.bones[7];
+      let shoulderL = skeleton.bones[8];
+      let upper_armL = skeleton.bones[9];
+      let forearmL = skeleton.bones[10];
+      let handL = skeleton.bones[11];
+      let palm01L = skeleton.bones[12];
+      let f_index01L = skeleton.bones[13];
+      let f_index02L = skeleton.bones[14];
+      let f_index03L = skeleton.bones[15];
+      let thumb01L = skeleton.bones[16];
+      let thumb02L = skeleton.bones[17];
+      let thumb03L = skeleton.bones[18];
+      let palm02L = skeleton.bones[19];
+      let f_middle01L = skeleton.bones[20];
+      let f_middle02L = skeleton.bones[21];
+      let f_middle03L = skeleton.bones[22];
+      let palm03L = skeleton.bones[23];
+      let f_ring01L = skeleton.bones[24];
+      let f_ring02L = skeleton.bones[25];
+      let f_ring03L = skeleton.bones[26];
+      let palm04L = skeleton.bones[27];
+      let f_pinky01L = skeleton.bones[28];
+      let f_pinky02L = skeleton.bones[29];
+      let f_pinky03L = skeleton.bones[30];
+      let shoulderR = skeleton.bones[31];
+      let upper_armR = skeleton.bones[32];
+      let forearmR = skeleton.bones[33];
+      let handR = skeleton.bones[34];
+      let palm01R = skeleton.bones[35];
+      let f_index01R = skeleton.bones[36];
+      let f_index02R = skeleton.bones[37];
+      let f_index03R = skeleton.bones[38];
+      let thumb01R = skeleton.bones[39];
+      let thumb02R = skeleton.bones[40];
+      let thumb03R = skeleton.bones[41];
+      let palm02R = skeleton.bones[42];
+      let f_middle01R = skeleton.bones[43];
+      let f_middle02R = skeleton.bones[44];
+      let f_middle03R = skeleton.bones[45];
+      let palm03R = skeleton.bones[46];
+      let f_ring01R = skeleton.bones[47];
+      let f_ring02R = skeleton.bones[48];
+      let f_ring03R = skeleton.bones[49];
+      let palm04R = skeleton.bones[50];
+      let f_pinky01R = skeleton.bones[51];
+      let f_pinky02R = skeleton.bones[52];
+      let f_pinky03R = skeleton.bones[53];
+      let breastL = skeleton.bones[54];
+      let breastR = skeleton.bones[55];
+      let pelvisL = skeleton.bones[56];
+      let thighL = skeleton.bones[57];
+      let shinL = skeleton.bones[58];
+      let footL = skeleton.bones[59];
+      let toeL = skeleton.bones[60];
+      let heel02L = skeleton.bones[61];
+      let pelvisR = skeleton.bones[62];
+      let thighR = skeleton.bones[63];
+      let shinR = skeleton.bones[64];
+      let footR = skeleton.bones[65];
+      let toeR = skeleton.bones[66];
+      let heel02R = skeleton.bones[67]; 
+      
+        //console.log(skeleton.bones[32].quaternion);
+        console.log(gltf.animations);
+            mixer = new THREE.AnimationMixer( model );
+            var action;
+            gltf.animations.forEach((clip) => {
+                //clip.duration = 0.5
+                action = mixer.clipAction(clip);
+                //console.log(clip.name)
+                action.setLoop(THREE.LoopOnce);
+                action.clampWhenFinished = true;
+                if (clip.name=="newleftdownblock") {
+                action.play();
+                
+                }
+               console.log(skeleton.bones[32].quaternion)
+            });
+
+      });
+
+      camera.position.z = 5;
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 1, 0);
+      controls.update();
+
+      let rotate_axis = "y";
+      const clock = new THREE.Clock();
+      let bone_number = 9
+      
+      function animate() {
+        requestAnimationFrame(animate);
+        if (mixer && PawsOn) {
+        mixer.update(clock.getDelta());
+        //console.log(clock.getElapsedTime())
+        if (clock.getElapsedTime() > 4.95 && clock.getElapsedTime() < 5 ) {
+           console.log("Current rotate target name: " + skeleton.bones[bone_number].name
+            + "\n_w: " + skeleton.bones[bone_number].quaternion.w.toFixed(2) + ", "
+            + "\n_x: " + skeleton.bones[bone_number].quaternion.x.toFixed(2) + ", "
+            + "\n_y: " + skeleton.bones[bone_number].quaternion.y.toFixed(2) + ", "
+            + "\n_z: " + skeleton.bones[bone_number].quaternion.z.toFixed(2) + ", ")
+            
+        }
+        }
+        //cube.rotation.z += 0.01;
+        //cube.rotation.y += 0.01;
+        // if (skeleton) {
+        //   skeleton.bones[32].rotation.z += 0.01;
+        // }
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
