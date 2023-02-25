@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>TKD game (ThreeJS)</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+    <script src="./movement-functions/choon_bi_functions.js"></script>
+    <style>
+      body {
+        width: 100vw;
+        height: 100vh;
+        align-items: center;
+        padding-left: 10px;
+        margin-left: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <input type="button" value="Attention"
+    onclick="test_caller()"
+    
+    ></input>
+    <canvas id="c"></canvas>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.142.0/build/three.module.js"
+        }
+      }
+    </script>
+
+    <script type="module">
+
+
+      // three js and various imports section 
+
+      import * as THREE from "three";
+
+      import { OrbitControls } from "https://unpkg.com/three@0.142.0/examples/jsm/controls/OrbitControls.js";
+      import { GLTFLoader } from "https://unpkg.com/three@0.142.0/examples/jsm/loaders/GLTFLoader.js";
+
+      import Stats from "https://unpkg.com/three@0.142.0/examples/jsm/libs/stats.module.js";
+      import { GUI } from "https://unpkg.com/three@0.142.0/examples/jsm/libs/lil-gui.module.min.js";
+
+      import * as SkeletonUtils from "https://unpkg.com/three@0.142.0/examples/jsm/utils/SkeletonUtils.js";
+
+      import * as testCalls from "./movement-functions/choon_bi_functions.js"
+      
+      
+      
+      // the global variable section
+      
+      
+      
+      let stats, camera, scene, renderer, skeleton;
+
+      const pointer = new THREE.Vector2();
+      const raycaster = new THREE.Raycaster();
+      var positive = 1.57  
+      let mixer, clock
+
+      init();
+
+
+
+      function init() {
+      
+        // scene section goes first
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color("lightblue");
+
+        //console.log(scene)
+
+
+
+
+        // camera section   
+        camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.01,
+          30
+        );
+        camera.position.set(0, 1, 2);
+
+
+        // lights section
+        const light = new THREE.HemisphereLight(0xbbbbff, 0x444422);
+        light.position.set(0, 1, 0);
+        scene.add(light);
+
+
+        // grid section
+        const grid = new THREE.GridHelper(200, 40, 0x000000, 0x000000);
+        grid.material.opacity = 0.2;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+
+        // axes helper
+        const axesHelper = new THREE.AxesHelper(5);
+        scene.add(axesHelper);
+
+
+
+        // menu for gui section
+          var menu = {
+          handVec: String,
+
+          x_axis_world: false,
+
+          y_axis_world: false,
+
+          z_axis_world: false,
+        };
+        
+        
+        // create gui
+        var gui = new GUI();
+
+
+        // x, y, z values for rotate axis menu
+        const x = 0;
+        const y = 1;
+        const z = 0;
+
+        const axisVector = new THREE.Vector3(x, y, z);
+
+        
+        // pointer down function area begins
+        function onPointerDown() {
+          pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+          pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+          raycaster.setFromCamera(pointer, camera);
+
+          let current_rotate_target;
+          let handVectarget = new THREE.Vector3();
+                    for (let index = 0; index < skeleton.bones.length; index++) {
+            if (
+              skeleton.bones[index].name == gui.children[0].object.textField
+              
+            ) {
+              current_rotate_target = skeleton.bones[index];
+             
+            } else if (gui.children[0].object.textField == "metarig") {
+              current_rotate_target = scene.children[3].children[2]
+            }
+          }
+
+ 
+          if (gui.children[0].object.number == "spine006") {
+            console.log ("Current world position: ")
+             skeleton.bones[6].getWorldPosition(handVectarget);
+             console.log(handVectarget.y);
+             }
+                  
+
+//console.log(gui.children[0].object.positive)
+
+
+
+
+// // // change rotation direction area
+
+
+
+
+
+
+
+
+          if (menu.x_axis_world) {
+           
+            current_rotate_target.rotateOnAxis(axisVector, gui.children[0].object.positive/ 8);
+          } else if (menu.y_axis_world) {
+           
+            current_rotate_target.rotateOnAxis(axisVector, gui.children[0].object.positive/ 8);
+            //console.log(positive)
+           
+          } else if (menu.z_axis_world) {
+            
+            current_rotate_target.rotateOnAxis(axisVector, gui.children[0].object.positive / 8);
+          }
+
+          
+          console.log(
+            "Bone currently rotating: " +
+              current_rotate_target.name +
+              ", \n" +
+              "_w: " +
+              current_rotate_target.quaternion.w.toFixed(8) +
+              ", \n_x: " +
+              current_rotate_target.quaternion.x.toFixed(8) +
+              ", \n_y: " +
+              current_rotate_target.quaternion.y.toFixed(8) +
+              ", \n_z: " +
+              current_rotate_target.quaternion.z.toFixed(8) +
+              ", \n"
+          );
+
+          const intersects = raycaster.intersectObjects(scene.children, true);
+        }
+
+
+
+        // gltf load section
+        const loader = new GLTFLoader();
+
+        loader.load("TKD_girl_15.glb", function (gltf) {
+          const model = gltf.scene;
+
+          scene.add(model);
+
+          mixer = new THREE.AnimationMixer( gltf.scene );
+        
+        gltf.animations.forEach( ( clip ) => {
+          
+            mixer.clipAction( clip ).play();
+          
+        } );
+
+
+          model.position.x = 0;
+          model.position.y = 0;
+          model.position.z = 0;
+
+          skeleton = new THREE.SkeletonHelper(model);
+          skeleton.visible = true;
+          scene.add(skeleton); 
+          console.log(gltf.scene)
+          
+      let spine = skeleton.bones[0];
+      let spine001 = skeleton.bones[1];
+      let spine002 = skeleton.bones[2];
+      let spine003 = skeleton.bones[3];
+      let spine004 = skeleton.bones[4];
+      let spine005 = skeleton.bones[5];
+      let spine006 = skeleton.bones[6];
+      let face = skeleton.bones[7];
+      let shoulderL = skeleton.bones[8];
+      let upper_armL = skeleton.bones[9];
+      let forearmL = skeleton.bones[10];
+      let handL = skeleton.bones[11];
+      let palm01L = skeleton.bones[12];
+      let f_index01L = skeleton.bones[13];
+      let f_index02L = skeleton.bones[14];
+      let f_index03L = skeleton.bones[15];
+      let thumb01L = skeleton.bones[16];
+      let thumb02L = skeleton.bones[17];
+      let thumb03L = skeleton.bones[18];
+      let palm02L = skeleton.bones[19];
+      let f_middle01L = skeleton.bones[20];
+      let f_middle02L = skeleton.bones[21];
+      let f_middle03L = skeleton.bones[22];
+      let palm03L = skeleton.bones[23];
+      let f_ring01L = skeleton.bones[24];
+      let f_ring02L = skeleton.bones[25];
+      let f_ring03L = skeleton.bones[26];
+      let palm04L = skeleton.bones[27];
+      let f_pinky01L = skeleton.bones[28];
+      let f_pinky02L = skeleton.bones[29];
+      let f_pinky03L = skeleton.bones[30];
+      let shoulderR = skeleton.bones[31];
+      let upper_armR = skeleton.bones[32];
+      let forearmR = skeleton.bones[33];
+      let handR = skeleton.bones[34];
+      let palm01R = skeleton.bones[35];
+      let f_index01R = skeleton.bones[36];
+      let f_index02R = skeleton.bones[37];
+      let f_index03R = skeleton.bones[38];
+      let thumb01R = skeleton.bones[39];
+      let thumb02R = skeleton.bones[40];
+      let thumb03R = skeleton.bones[41];
+      let palm02R = skeleton.bones[42];
+      let f_middle01R = skeleton.bones[43];
+      let f_middle02R = skeleton.bones[44];
+      let f_middle03R = skeleton.bones[45];
+      let palm03R = skeleton.bones[46];
+      let f_ring01R = skeleton.bones[47];
+      let f_ring02R = skeleton.bones[48];
+      let f_ring03R = skeleton.bones[49];
+      let palm04R = skeleton.bones[50];
+      let f_pinky01R = skeleton.bones[51];
+      let f_pinky02R = skeleton.bones[52];
+      let f_pinky03R = skeleton.bones[53];
+      let breastL = skeleton.bones[54];
+      let breastR = skeleton.bones[55];
+      let pelvisL = skeleton.bones[56];
+      let pelvisR = skeleton.bones[62];
+      let thighL = skeleton.bones[58];
+      let shinL = skeleton.bones[59];
+      let footL = skeleton.bones[60];
+      let toeL = skeleton.bones[61];
+      // let heel02L = skeleton.bones[62];
+      let thighR = skeleton.bones[63];
+      let shinR = skeleton.bones[64];
+      let footR = skeleton.bones[65];
+      let toeR = skeleton.bones[66];
+      let heel02R = skeleton.bones[67]; 
+                          
+       
+
+      // // // choonbi function area begins
+       
+      function Choonbi(){
+         gsap.to(upper_armL.quaternion, {
+        // _w: 0.4652,
+        // _x: 0.1041,
+        // _y: 0.5987,
+        // _z: -0.6437,
+        _w: -0.5446,
+        _x: -0.1669,
+        _y: -0.5502,
+        _z: -0.6106,
+        duration: 1,
+      
+      });
+
+      gsap.to(upper_armR.quaternion, {
+        duration: 1,
+
+        // _w: 0.4837,
+        // _x: 0.0721,
+        // _y: -0.5853,
+        // _z: 0.6467,
+        _w: 0.5446,
+        _x: -0.1669,
+        _y: -0.5502,
+        _z: 0.6106,
+      });
+      gsap.to(forearmL.quaternion, {
+        // _w: 0.738,
+        // _x: 0.303,
+        // _y: 0.3777,
+        // _z: -0.4699,
+        _w: 0.945,
+        _x: 0.2639,
+        _y: 0.0696,
+        _z: -0.1804,
+        duration: 1,
+      });
+
+      gsap.to(forearmR.quaternion, {
+        duration: 1,
+        // _w: 0.738,
+        // _x: 0.303,
+        // _y: -0.3777,
+        // _z: 0.4699,
+        _w: 0.945,
+        _x: 0.2639,
+        _y: -0.0696,
+        _z: 0.1804,
+      });
+      gsap.to(spine.position, {
+        x: 0.2,
+        y: 0.9,
+        duration: 0.5,
+      });
+
+      gsap.to(thighL.quaternion, {
+//        _w: 0.4721, 
+// _x: 0.8612, 
+// _y: 0.1621, 
+// _z: -0.0961, 
+_w: 0.45,
+        _x: 0.85,
+        _y: 0.26,
+        _z: 0.14,
+        duration: 0.5,
+      });
+
+      gsap.to(thighR.quaternion, {
+        _w: 0.45,
+        _x: 0.85,
+        _y: -0.26,
+        _z: -0.14,
+
+        duration: 0.5,
+      });
+
+      gsap.to(shinL.quaternion, {
+        duration: 0.5,
+      _w: 0.88,
+        _x: 0.42,
+        _y: -0.05,
+        _z: 0.22,
+      });
+      gsap.to(shinR.quaternion, {
+        duration: 0.5,
+        _w: 0.88,
+        _x: 0.42,
+        _y: 0.05,
+        _z: -0.22,
+        // onComplete: calling_loadmodel_service,
+        // onCompleteParams: [spine],
+      });
+      gsap.to(footL.quaternion, {
+        duration: 0.5,
+        // _w: 0.79,
+        // _x: -0.62,
+        // _y: 0.01,
+        // _z: -0.03,
+      });
+
+      gsap.to(footR.quaternion, {
+        duration: 0.5,
+        // _w: 0.79,
+        // _x: -0.62,
+        // _y: -0.01,
+        // _z: 0.03,
+      });
+   
+  
+    }
+  
+    
+    
+
+
+  // // // movement one down function area begins
+ let right_arm_wide_middle_block_arms_down = () => {
+      gsap.to(shoulderR.quaternion, {
+        _w: 0.62,
+        _x: -0.61,
+        _y: 0.35,
+        _z: 0.36,
+        duration: 1,
+      });
+
+     
+      gsap.to(upper_armR.quaternion, {
+        // _w: 0.5,
+        // _x: -0.26,
+        // _y: -0.66,
+        // _z: 0.5,
+        // _w: 0.43, 
+        // _x: -0.11, 
+        // _y: -0.47, 
+        // _z: 0.77, 
+        duration: 1,
+      });
+
+      gsap.to(forearmR.quaternion, {
+        // _w: 0.99,
+        // _x: 0.14,
+        // _y: -0.07,
+        // _z: -0.05,
+        // _w: 0.58,
+        // _x: 0.55,
+        // _y: -0.27,
+        // _z: -0.54,
+        duration: 1,
+      });
+
+      
+    }
+    
+    function handVec_generator () {
+      let handVec = new THREE.Vector3();
+           if (spine006){
+             spine006.getWorldPosition(handVec);
+             console.log(handVec.y);
+           }
+    }
+  
+    
+        function attenzione(){
+         
+     gsap.to(pelvisL.quaternion, {
+        _w: 0.34660411,
+        _x: 0.04596912,
+        _y: -0.5076862,
+        _z: -0.78748463,
+        duration: 1,
+      });
+
+      gsap.to(pelvisR.quaternion, {
+      _w: 0.2763,
+        _x: -0.4047,
+        _y: 0.8634,
+        _z: 0.12,
+
+        duration: 1,
+      });
+
+      // gsap.to(handR.quaternion, {
+      //   _w: 0.99,
+      //   _x: -0.15,
+      //   _y: 0.01,
+      //   _z: 0.01,
+      //   duration: 1,
+      // });
+
+      // gsap.to(upper_armL.quaternion, {
+      //   duration: 1,
+      //   // _w: 0.4,
+      //   // _x: -0.39,
+      //   // _y: 0.77,
+      //   // _z: -0.29,
+      //   _w: 0.2386,
+      //   _x: -0.596,
+      //   _y: 0.7634,
+      //   _z: -0.0711,
+      // });
+
+      // gsap.to(forearmL.quaternion, {
+      //   duration: 1,
+      //   // _w: 0.98,
+      //   // _x: 0.1,
+      //   // _y: 0.04,
+      //   // _z: -0.14,
+      //   _w: 0.5703,
+      //   _x: 0.8138,
+      //   _y: 0.0967,
+      //   _z: 0.0569,
+      // });
+
+      // gsap.to(handL.quaternion, {
+      //   duration: 1,
+      //   // _w: 0.91,
+      //   // _x: -0.14,
+      //   // _y: -0.39,
+      //   // _z: 0.04,
+      //   _w: 0.6311,
+      //   _x: -0.0492,
+      //   _y: -0.7685,
+      //   _z: 0.0932,
+      // });
+  };
+
+   
+    var params = { 
+            positive: 1.57,
+            textField: "upper_armL",
+            number: "spine006",
+            RAWDB: attenzione,
+            Choonbi: Choonbi,
+            
+        };
+
+          var CB1Controller = gui.add(params, "number").listen();
+
+          var CB2Controller = gui.add(params, "positive");
+
+          var CB3Controller = gui.add(params, "textField");
+
+
+          var CB4Controller = gui.add(menu, "z_axis_world").listen();
+          CB4Controller.onChange(function (value) {
+            axisVector.z = 0;
+            axisVector.y = 0;
+            axisVector.x = 1;
+            menu.y_axis_world = false;
+            menu.x_axis_world = false;
+          });
+
+          var CB5Controller = gui.add(menu, "y_axis_world").listen();
+          CB5Controller.onChange(function (value) {
+            axisVector.z = 1;
+            axisVector.y = 0;
+            axisVector.x = 0;
+            menu.z_axis_world = false;
+            menu.x_axis_world = false;
+          });
+          var CB6Controller = gui.add(menu, "x_axis_world").listen();
+          CB6Controller.onChange(function (value) {
+            axisVector.z = 0;
+            axisVector.y = 1;
+            axisVector.x = 0;
+            menu.z_axis_world = false;
+            menu.y_axis_world = false;
+          });
+          var CB7Controller = gui.add(params, "RAWDB");
+          var CB8Controller = gui.add(params, "Choonbi");
+
+         
+
+        
+          for (let index = 0; index < skeleton.bones.length; index++) {
+            
+if (skeleton.bones[index].name == "spine") {
+  
+}
+
+            console.log(index + " " + skeleton.bones[index].name
+            + "\n_w: " + skeleton.bones[index].quaternion.w.toFixed(8) + ", "
+            + "_x: " + skeleton.bones[index].quaternion.x.toFixed(8) + ", "
+            + "_y: " + skeleton.bones[index].quaternion.y.toFixed(8) + ", "
+            + "_z: " + skeleton.bones[index].quaternion.z.toFixed(8) + ", "
+            
+            );
+            
+          }
+
+          animate();
+        });
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        document.body.appendChild(renderer.domElement);
+
+        window.addEventListener("resize", onWindowResize, false);
+
+        renderer.domElement.addEventListener("pointerdown", onPointerDown);
+
+        // // stats
+        stats = new Stats();
+        document.body.appendChild(stats.dom);
+
+        // // orbit controls
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 0.5, 0);
+        controls.update();
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        
+        renderer.render(scene, camera);
+
+        stats.update();
+      }
+
+      
+    </script>
+  </body>
+</html>
