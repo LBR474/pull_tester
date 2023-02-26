@@ -96,10 +96,13 @@
 
 
       function init() {
+
+        // textture loader section
+        const texLoader = new THREE.textureLoader()
       
         // scene section goes first
         scene = new THREE.Scene();
-        scene.background = new THREE.Color("lightblue");
+        //scene.background = new THREE.Color("lightblue");
         //document.getElementsByClassName("lil-gui").style.background="aqua"
 
         console.log(scene)
