@@ -5,7 +5,7 @@
     <title>TKD game (ThreeJS) LocalMain branch</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
-    <script src="./movement-functions/choon_bi_functions.js"></script>
+    <!-- <script src="./movement-functions/choon_bi_functions.js"></script> -->
     <style>
       body {
         width: 100vw;
@@ -71,12 +71,14 @@
       import { OrbitControls } from "https://unpkg.com/three@0.142.0/examples/jsm/controls/OrbitControls.js";
       import { GLTFLoader } from "https://unpkg.com/three@0.142.0/examples/jsm/loaders/GLTFLoader.js";
 
+      
+
       import Stats from "https://unpkg.com/three@0.142.0/examples/jsm/libs/stats.module.js";
       import { GUI } from "https://unpkg.com/three@0.142.0/examples/jsm/libs/lil-gui.module.min.js";
 
       import * as SkeletonUtils from "https://unpkg.com/three@0.142.0/examples/jsm/utils/SkeletonUtils.js";
 
-      import * as testCalls from "./movement-functions/choon_bi_functions.js"
+      // import * as testCalls from "./movement-functions/choon_bi_functions.js"
       
       
       
@@ -98,11 +100,11 @@
       function init() {
 
         // textture loader section
-        const texLoader = new THREE.textureLoader()
+        const texLoader = new THREE.TextureLoader()
       
         // scene section goes first
         scene = new THREE.Scene();
-        //scene.background = new THREE.Color("lightblue");
+        scene.background = texLoader.load('images/DE_.png')
         //document.getElementsByClassName("lil-gui").style.background="aqua"
 
         console.log(scene)
@@ -130,7 +132,7 @@
         const grid = new THREE.GridHelper(200, 40, 0x000000, 0x000000);
         grid.material.opacity = 0.2;
         grid.material.transparent = true;
-        scene.add(grid);
+        //scene.add(grid);
 
 
         // axes helper
@@ -178,8 +180,8 @@
 
           raycaster.setFromCamera(pointer, camera);
 
-          // let current_rotate_target = scene.children[3].children[2]
-          let current_rotate_target = scene.children[3]
+          let current_rotate_target = scene.children[2].children[2]
+          //let current_rotate_target = scene.children[3]
           let handVectarget = new THREE.Vector3();
           
 
@@ -231,7 +233,7 @@
         // gltf load section
         const loader = new GLTFLoader();
 
-        loader.load("product_placeholder_7.glb", function (gltf) {
+        loader.load("product_placeholder_8.glb", function (gltf) {
           const model = gltf.scene;
 
           scene.add(model);
